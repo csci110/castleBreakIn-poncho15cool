@@ -132,6 +132,7 @@ class Block extends Sprite {
         if (Block.blockToDestroy == 0) {
             game.end('Congratulations!\n\nPrincess Ann can continue her pursuit\nof the mysterious stranger!');
         }
+        return true;
     }
 }
 
