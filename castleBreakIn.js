@@ -1,9 +1,9 @@
-import {game, Sprite} from "./sgc/sgc.js";
+import { game, Sprite } from "./sgc/sgc.js";
 
 game.setBackground("grass.png");
 
 class Wall extends Sprite {
-    constructor(x,y,name,image){
+    constructor(x, y, name, image) {
         super();
         this.x = x;
         this.y = y;
@@ -11,32 +11,32 @@ class Wall extends Sprite {
         this.setImage(image);
         this.accelerateOnBounce = false;
     }
-}    
+}
 new Wall(0, 0, "A spooky castle wall", "castle.png");
 
 let leftwall = new Wall(0, 200, "Left side wall", "wall.png");
-      
+
 let rightwall = new Wall(game.displayWidth - 48, 200, "Right side wall", "wall.png");
 
 class Princess extends Sprite {
-    constructor(){
-    super();
-    this.name = "Princess";
-    this.setImage("ann.png");
-    this.height = 48;
-    this.width = 48;
-    this.x = game.displayWidth/2;
-    this.y = game.displayHeight - 48;
-    this.speedWhenWalking = 150;
-    this.lives = 3;
-    this.accelerateOnBounce = false;
-    this.defineAnimation("left", 9 , 11);
-    this.defineAnimation("right", 3 , 5);
-    } 
-    
+    constructor() {
+        super();
+        this.name = "Princess";
+        this.setImage("ann.png");
+        this.height = 48;
+        this.width = 48;
+        this.x = game.displayWidth / 2;
+        this.y = game.displayHeight - 48;
+        this.speedWhenWalking = 150;
+        this.lives = 3;
+        this.accelerateOnBounce = false;
+        this.defineAnimation("left", 9, 11);
+        this.defineAnimation("right", 3, 5);
+    }
+
     handleFirstGameLoop() {
         // Set up a text area to display the number of lives remaining.
-        this.livesDisplay = game.createTextArea(game.displayWidth, 20);
+        this.livesDisplay = game.createTextArea(game.displayWidth / 2, 20);
         this.updateLivesDisplay();
     }
     updateLivesDisplay() {
@@ -44,15 +44,14 @@ class Princess extends Sprite {
     }
     handleGameLoop() {
         this.speed = 0;
-    
     }
-    LoseALife() {
+    loseALife() {
         this.lives = this.lives - 1;
         this.updateLivesDisplay();
         if (this.lives > 0) {
             new Ball();
         }
-        if (this.lives < 0) {
+        if (this.lives == 0) {
             game.end('The mysterious stranger has escaped\nPrincess Ann for now!\n\nBetter luck next time.');
         }
     }
@@ -75,56 +74,65 @@ class Princess extends Sprite {
         // 2. it hits the upper fourth, which is Ann's head.
         let horizontalOffset = this.x - otherSprite.x;
         let verticalOffset = this.y - otherSprite.y;
-        if (Math.abs(horizontalOffset) < this.width / 3 
-                    && verticalOffset > this.height / 4) {
+        if (Math.abs(horizontalOffset) < this.width / 3 &&
+            verticalOffset > this.height / 4) {
             // The new angle depends on the horizontal difference between sprites.
             otherSprite.angle = 90 + 2 * horizontalOffset;
-                    }
+        }
         return false;
-}
+    }
 }
 let ann = new Princess;
 
 class Ball extends Sprite {
-     constructor(){
-     super();
-     this.x = game.displayWidth/2;
-     this.y = game.displayHeight/2;
-     this.name = "Soccer ball";
-     this.setImage("ball.png");
-     this.defineAnimation("spin", 0, 11);
-     this.playAnimation("spin", true);
-     this.speed = 1;
-     this.angle = 50 + Math.random() * 80;
-     }
-     
-     handleGameLoop() {
-         if (this.speed < 200) {
-             this.speed +=2;
-     }
-     }
-     handleBoundaryContact() {
-         game.removeSprite(this);
-         Ball.ballsInPlay = Ball.ballsInPlay - 1;
-         if (Ball.ballsInPlay <= 0) {
-         ann.loseALife();
-     }
-     }
+    constructor() {
+        super();
+        this.x = game.displayWidth / 2;
+        this.y = game.displayHeight / 2;
+        this.name = "Soccer ball";
+        this.setImage("ball.png");
+        this.defineAnimation("spin", 0, 11);
+        this.playAnimation("spin", true);
+        this.speed = 1;
+        this.angle = 50 + Math.random() * 80;
+        Ball.ballsInPlay = Ball.ballsInPlay + 1;
+    }
+
+    handleGameLoop() {
+        if (this.speed < 200) {
+            this.speed += 2;
+        }
+    }
+    handleBoundaryContact() {
+        game.removeSprite(this);
+        Ball.ballsInPlay = Ball.ballsInPlay - 1;
+        if (Ball.ballsInPlay == 0) {
+            ann.loseALife();
+        }
+    }
 }
+
+Ball.ballsInPlay = 0;
 new Ball();
 
 class Block extends Sprite {
-    constructor(x, y){
-    super();
-    this.x = x;
-    this.y = y;
-    this.name = Block;
-    this.setImage("block1.png");
-    this.accelerateOnBounce = false;
-    this.Block.blocksToDestroy = Block.blocksToDestroy + 1;
+    constructor(x, y) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.name = "block1";
+        this.setImage("block1.png");
+        this.accelerateOnBounce = false;
+        Block.blocksToDestroy = Block.blocksToDestroy + 1;
     }
-    
-    handleCollision()
+
+    handleCollision() {
+        game.removeSprite(this);
+        Block.blocksToDestroy = Block.blocksToDestroy - 1;
+        if (Block.blockToDestroy == 0) {
+            game.end('Congratulations!\n\nPrincess Ann can continue her pursuit\nof the mysterious stranger!');
+        }
+    }
 }
 
 for (let i = 0; i < 5; i = i + 1) {
